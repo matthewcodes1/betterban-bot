@@ -15,5 +15,19 @@ module.exports = class BetterBanDatabase extends Sequelize {
             timestamp: Sequelize.STRING,
             timeout: Sequelize.STRING,
         });
+        this.Mute = this.define('mute', {
+            userId: Sequelize.STRING,
+            guildId: Sequelize.STRING,
+            mutedRoleId: Sequelize.STRING,
+            timestamp: Sequelize.STRING,
+            timeout: Sequelize.STRING,
+        });
+        this.Guild = this.define('guild', {
+            guildId: {
+                type: Sequelize.STRING,
+                unique: true,
+            },
+            mutedRoleId: Sequelize.STRING,
+        });
     }
 };
