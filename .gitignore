@@ -1,3 +1,4 @@
 /node_modules/
 /betterban.log
 /config.toml
+/database.sqlite

@@ -5,6 +5,7 @@ const fs = require('fs');
 const RegexFramework = require('./RegexFramework');
 const Events = require('./Events');
 const CommandLoader = require('./CommandLoader');
+const BetterBanDatabase = require('./BetterBanDatabase');
 
 
 module.exports = class ConstitutionBot extends Eris {
@@ -16,8 +17,10 @@ module.exports = class ConstitutionBot extends Eris {
         let c = toml.parse(fs.readFileSync(configPath));
         super(c.token, options);
         this.config = c;
+        this.db = new BetterBanDatabase();
         this.handler = new RegexFramework();
         Events(this);
         CommandLoader(this);
+        this.db.sync();
     }
 };
