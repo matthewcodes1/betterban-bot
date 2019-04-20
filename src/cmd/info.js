@@ -10,4 +10,8 @@ module.exports.loadModule = function loadModule(bot) {
             bot.createMessage(message.channel.id, `Commit number ${stdout}`);
         });
     });
+    bot.handler.endpoint('^help$', [], (match, message) => {
+        let textToSend = '```\nhelp - Shows the list of available commands.\nversion - Shows the commit number of the current running instance.\nping - Mostly a debug command, echoes back \'Pong\'\n```';
+        bot.createMessage(message.channel.id, textToSend);
+    });
 };
