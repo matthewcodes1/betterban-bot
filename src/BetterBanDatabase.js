@@ -28,6 +28,7 @@ module.exports = class BetterBanDatabase extends Sequelize {
                 unique: true,
             },
             mutedRoleId: Sequelize.STRING,
+            channels: Sequelize.TEXT,
         });
     }
 };

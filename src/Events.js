@@ -3,6 +3,14 @@ const lt = require('long-timeout');
 
 // const wait = require('./wait.js');
 
+function checkIfNewElement(_old, _new) {
+    if (_new.length > _old.length) return true;
+    for (let i = 0; i < _new.length; i++) {
+        if (_old.indexOf(_new[i]) < 0) return true;
+    }
+    return false;
+}
+
 module.exports = function Events(bot) {
     // With this model, there can't be user-defined prefix easily; maybe switch to the previous system.
     let r;
@@ -126,15 +134,27 @@ module.exports = function Events(bot) {
             nick: oldNick.toLowerCase().startsWith('m ') || oldNick.toLowerCase().startsWith('mute ') ? '' : oldNick,
         });
 
+        let channels = guild.channels.map(c => c.id);
+
         let g = await bot.db.Guild.findOne({ where: { guildId: guild.id } });
         let roleId;
         if (g) {
             // Guild in database
             let mutedRoleId = g.get('mutedRoleId');
             let t = guild.roles.find(a => a.id === mutedRoleId);
+            console.log(g.get('channels').split(','));
+            let newElement = checkIfNewElement(g.get('channels').split(','), channels);
             if (t) {
                 // Role still exists
                 roleId = t.id;
+                if (newElement) {
+                    Array.from(guild.channels.values()).forEach(channel => {
+                        bot.editChannelPermission(channel.id, roleId, 0, 2103360, 'role');
+                    });
+                    await bot.db.Guild.update({
+                        channels: channels.join(','),
+                    }, { where: { guildId: guild.id } });
+                }
             }
             else {
                 // Role has been removed
@@ -146,6 +166,7 @@ module.exports = function Events(bot) {
                 });
                 await bot.db.Guild.update({
                     mutedRoleId: roleId,
+                    channels: channels.join(','),
                 }, { where: { guildId: guild.id } });
             }
         }
@@ -160,6 +181,7 @@ module.exports = function Events(bot) {
             await bot.db.Guild.create({
                 guildId: guild.id,
                 mutedRoleId: roleId,
+                channels: channels.join(','),
             });
         }
 
