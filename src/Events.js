@@ -142,7 +142,6 @@ module.exports = function Events(bot) {
             // Guild in database
             let mutedRoleId = g.get('mutedRoleId');
             let t = guild.roles.find(a => a.id === mutedRoleId);
-            console.log(g.get('channels').split(','));
             let newElement = checkIfNewElement(g.get('channels').split(','), channels);
             if (t) {
                 // Role still exists
