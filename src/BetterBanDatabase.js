@@ -1,12 +1,12 @@
 const Sequelize = require('sequelize');
 
 module.exports = class BetterBanDatabase extends Sequelize {
-    constructor() {
+    constructor(path) {
         super('database', 'user', 'password', {
             host: 'localhost',
             dialect: 'sqlite',
             logging: false,
-            storage: 'database.sqlite',
+            storage: path,
         });
 
         this.Ban = this.define('ban', {
