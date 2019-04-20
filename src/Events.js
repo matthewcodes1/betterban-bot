@@ -1,7 +1,7 @@
 const timestring = require('timestring');
 const lt = require('long-timeout');
 
-const wait = require('./wait.js');
+// const wait = require('./wait.js');
 
 module.exports = function Events(bot) {
     // With this model, there can't be user-defined prefix easily; maybe switch to the previous system.
@@ -15,15 +15,15 @@ module.exports = function Events(bot) {
         bans.forEach(b => {
             if (parseInt(b.get('timestamp')) <= Date.now()) {
                 bot.unbanGuildMember(b.get('guildId'), b.get('userId'), 'Unban timeout has passed.');
-                Logger.verbose(`${b.get('userId')} has been unbanned from guild ${b.get('guildId')}}`);
+                Logger.debug(`${b.get('userId')} has been unbanned from guild ${b.get('guildId')}}`);
                 b.destroy();
             }
             else {
                 let timeout = parseInt(b.get('timestamp')) - Date.now();
-                Logger.verbose(`Reset tempban on user ${b.get('userId')} with timeout ${timeout} in guild ${b.get('guildId')}`);
+                Logger.debug(`Reset tempban on user ${b.get('userId')} with timeout ${timeout} in guild ${b.get('guildId')}`);
                 lt.setTimeout(() => {
                     bot.unbanGuildMember(b.get('guildId'), b.get('userId'), 'Unban timeout has passed.');
-                    Logger.verbose(`${b.get('userId')} has been unbanned from guild ${b.get('guildId')}}`);
+                    Logger.debug(`${b.get('userId')} has been unbanned from guild ${b.get('guildId')}}`);
                     b.destroy();
                 }, timeout);
             }
@@ -33,15 +33,15 @@ module.exports = function Events(bot) {
         mutes.forEach(b => {
             if (parseInt(b.get('timestamp')) <= Date.now()) {
                 bot.removeGuildMemberRole(b.get('guildId'), b.get('userId'), b.get('mutedRoleId'));
-                Logger.verbose(`${b.get('userId')} has been removed their muted role in guild ${b.get('guildId')}`);
+                Logger.debug(`${b.get('userId')} has been removed their muted role in guild ${b.get('guildId')}`);
                 b.destroy();
             }
             else {
                 let timeout = parseInt(b.get('timestamp')) - Date.now();
-                Logger.verbose(`Reset tempmute on user ${b.get('userId')} with timeout ${timeout} in guild ${b.get('guildId')}`);
+                Logger.debug(`Reset tempmute on user ${b.get('userId')} with timeout ${timeout} in guild ${b.get('guildId')}`);
                 lt.setTimeout(() => {
                     bot.removeGuildMemberRole(b.get('guildId'), b.get('userId'), b.get('mutedRoleId'));
-                    Logger.verbose(`${b.get('userId')} has been removed their muted role in guild ${b.get('guildId')}`);
+                    Logger.debug(`${b.get('userId')} has been removed their muted role in guild ${b.get('guildId')}`);
                     b.destroy();
                 }, timeout);
             }
@@ -101,11 +101,11 @@ module.exports = function Events(bot) {
         });
         lt.setTimeout(() => {
             bot.unbanGuildMember(guild.id, user.id, 'Unban timeout has passed.');
-            Logger.verbose(`${user.id} has been unbanned from guild ${guild.id}`);
+            Logger.debug(`${user.id} has been unbanned from guild ${guild.id}`);
             bot.db.Ban.destroy({ where: { userId: user.id, guildId: guild.id } });
         }, timeout);
 
-        Logger.verbose(`Set tempban on user ${user.id} with timeout ${timeoutString} in guild ${guild.id}`);
+        Logger.debug(`Set tempban on user ${user.id} with timeout ${timeoutString} in guild ${guild.id}`);
     });
 
     bot.on('guildMemberUpdate', async (guild, member, oldMember) => {
@@ -117,13 +117,13 @@ module.exports = function Events(bot) {
         let responsible = guild.members.find(m => m.id === user.id);
         if (!responsible.permission.has('voiceMuteMembers')) return;
         if (member.nick === oldMember.nick || !member.nick) return;
-        let match = member.nick.match(/^m(?:ute)?(.*?)$/);
+        let match = member.nick.match(/^m(?:ute)? +?(.*?)$/);
         if (!match) return;
         if (!match[1]) return;
 
         let oldNick = oldMember.nick ? oldMember.nick : '';
         bot.editGuildMember(guild.id, member.id, {
-            nick: oldNick.toLowerCase().startsWith('m') ? '' : oldNick,
+            nick: oldNick.toLowerCase().startsWith('m ') || oldNick.toLowerCase().startsWith('mute ') ? '' : oldNick,
         });
 
         let g = await bot.db.Guild.findOne({ where: { guildId: guild.id } });
@@ -178,10 +178,10 @@ module.exports = function Events(bot) {
         });
         lt.setTimeout(() => {
             bot.removeGuildMemberRole(guild.id, member.id, roleId);
-            Logger.verbose(`${user.id} has been removed their muted role in guild ${guild.id}`);
-            bot.db.Mute.destroy({ where: { userId: user.id, guildId: guild.id } });
+            Logger.debug(`${member.id} has been removed their muted role in guild ${guild.id}`);
+            bot.db.Mute.destroy({ where: { userId: member.id, guildId: guild.id } });
         }, timeout);
 
-        Logger.verbose(`Set tempmute on user ${user.id} with timeout ${timeoutString} in guild ${guild.id}`);
+        Logger.debug(`Set tempmute on user ${member.id} with timeout ${timeoutString} in guild ${guild.id}`);
     });
 };

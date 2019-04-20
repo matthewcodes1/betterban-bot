@@ -22,4 +22,4 @@ Similarly, when you softban someone, put as reason `The actual reason - softban`
 
 ### Tempmute
 
-For this, you have to rename the nick of the person you want to mute to `mute 30s`. Like the tempban, of course, you can replace the 30s by the actual delay you want. The previous nick of the person will be reset automatically.
+For this, you have to rename the nick of the person you want to mute to `mute 30s`. Like the tempban, of course, you can replace the 30s by the actual delay you want. The previous nick of the person will be reset automatically. *You can also use* `m` *instead of* `mute`.
