@@ -20,15 +20,17 @@ etc.
 
 If you want the complete specification of what you can put, the module used under the hood to parse the delay is [timestring](https://www.npmjs.com/package/timestring).
 
+If no delay is put, the bot assumes it's a parmanent ban.
+
 ### Softban
 
-Similarly, if you want to softban a member, ban it normally but put as reason `The actual reason - softban`. *You can also use* `sb` *instead of* `softban`.
+Similarly, if you want to softban a member, ban them normally but put as reason `The actual reason - softban`. *You can also use* `sb` *instead of* `softban`.
 
 > A softban is when you kick someone, by banning them then immediately unbanning them under the hood, to delete their previous messages.
 
 ### Tempmute
 
-For this, you have to rename the nick of the person you want to mute to `mute 30s`. Like the tempban, of course, you can replace the 30s by the actual delay you want. The previous nick of the member will be reset automatically immediately. *You can also just type* `m` *instead of* `mute`.
+For this, you have to set the nick of the person you want to mute to `mute 30s`. Like the tempban, of course, you can replace the 30s by the actual delay you want. The previous nick of the member will be reset automatically immediately. *You can also just type* `m` *instead of* `mute`.
 
 > The member trying to mute another member has to have the Mute Members permission in order for it to work.
 
