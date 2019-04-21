@@ -42,6 +42,7 @@ And for the actual commands, well, you're likely to not need to use any of them 
 
 ```
 help - Shows the list of available commands.
+temps - Shows the currently tempbanned and tempmuted members and their remaining time in seconds.
 version - Shows the commit number of the current running instance.
 ping - Mostly a debug command, echoes back 'Pong'
 ```
