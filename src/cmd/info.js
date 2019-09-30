@@ -7,7 +7,13 @@ module.exports.loadModule = function loadModule(bot) {
                 bot.createMessage(message.channel.id, 'An error has occured');
                 return;
             }
-            bot.createMessage(message.channel.id, `Commit number ${stdout}`);
+            exec('git log -1', (error2, stdout2) => {
+                let msg = `Commit number ${stdout}`;
+                if (!error2) {
+                    msg += `\n\`\`\`\n${stdout2}\`\`\``;
+                }
+                bot.createMessage(message.channel.id, msg);
+            });
         });
     });
     bot.handler.endpoint('^help$', [], (match, message) => {
