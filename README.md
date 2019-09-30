@@ -32,13 +32,21 @@ Similarly, if you want to softban a member, ban them normally but put as reason 
 
 The bot will automatically unban the member just after to complete the softban.
 
+Examples:
+
+```
+Userbot - softban
+A bit too spammy - sb
+Edgy photos - sb
+```
+
 ### Tempmute
 
 For this, you have to set the nick of the person you want to mute to `mute delay`. Like the tempban, of course, you can replace the delay by the actual delay you want. The previous nick of the member will be reset automatically immediately. *You can also just type* `m` *instead of* `mute`.
 
 > The member trying to mute another member has to have the Mute Members permission in order for it to work.
 
-Examples
+Examples:
 
 ```
 mute 10h
