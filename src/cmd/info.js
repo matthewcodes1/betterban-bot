@@ -7,7 +7,7 @@ module.exports.loadModule = function loadModule(bot) {
                 bot.createMessage(message.channel.id, 'An error has occured');
                 return;
             }
-            exec('git log -1', (error2, stdout2) => {
+            exec('git log -1 --pretty=%B', (error2, stdout2) => {
                 let msg = `Commit number ${stdout}`;
                 if (!error2) {
                     msg += `\n\`\`\`\n${stdout2}\`\`\``;
