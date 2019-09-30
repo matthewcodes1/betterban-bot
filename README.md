@@ -36,9 +36,9 @@ For this, you have to set the nick of the person you want to mute to `mute 30s`.
 
 ### Various commands
 
-The bot doesn't have any prefix, the only way for it to respond to commands is by mentioning it before the command.
+The prefix of the bot **is its mention**.
 
-And for the actual commands, well, you're likely to not need to use any of them but here they are :
+And as for the actual commands, well, you're likely to not need to use any of them but here they are :
 
 ```
 help - Shows the list of available commands.
