@@ -1,7 +1,7 @@
 const timestring = require('timestring');
 const lt = require('long-timeout');
 
-// const wait = require('./wait.js');
+const wait = require('./Wait');
 
 function checkIfNewElement(_old, _new) {
     if (_new.length > _old.length) return true;
@@ -79,7 +79,7 @@ module.exports = function Events(bot) {
     });
 
     bot.on('guildBanAdd', async (guild, user) => {
-        // await wait(5);
+        await wait(5);
 
         let entries = (await bot.getGuildAuditLogs(guild.id, 1, undefined, 22)).entries;
         if (entries.length < 1) return;
@@ -117,7 +117,7 @@ module.exports = function Events(bot) {
     });
 
     bot.on('guildMemberUpdate', async (guild, member, oldMember) => {
-        // await wait(5);
+        await wait(5);
 
         let entries = (await bot.getGuildAuditLogs(guild.id, 1, undefined, 22)).entries;
         if (entries.length < 1) return;
