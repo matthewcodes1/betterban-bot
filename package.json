@@ -13,10 +13,10 @@
   },
   "dependencies": {
     "dbot-regex-handler": "^1.0.0",
-    "eris": "^0.9.0",
+    "eris": "^0.11.0",
     "long-timeout": "^0.1.1",
-    "sequelize": "^5.7.0",
-    "sqlite3": "^4.0.6",
+    "sequelize": "^5.15.1",
+    "sqlite3": "^4.1.0",
     "timestring": "^5.0.1",
     "toml": "^3.0.0",
     "winston": "^3.2.1"
