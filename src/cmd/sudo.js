@@ -35,7 +35,7 @@ module.exports.loadModule = function loadModule(bot) {
             bot.createMessage(message.channel.id, `${match[1]} was not sudoer`);
         }
     });
-    bot.handler.endpoint('^e ?```(?:.*\n)?(.*)\n?```$', [], async (match, message) => {
+    bot.handler.endpoint('^e ?```(?:.*\n)?(.*)\n?```$', [], (match, message) => {
         if (!bot.config.sudoers) return;
         if (bot.config.sudoers.indexOf(message.author.id) <= -1) return;
         try {
