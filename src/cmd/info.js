@@ -17,7 +17,7 @@ module.exports.loadModule = function loadModule(bot) {
         });
     });
     bot.handler.endpoint('^help$', [], (match, message) => {
-        let textToSend = '```\nhelp - Shows the list of available commands.\ntemps - Shows the currently tempbanned and tempmuted members and their remaining time in seconds (Ban Members permission needed).\nversion - Shows the commit number of the current running instance.\nping - Mostly a debug command, echoes back \'Pong\'\n```';
+        let textToSend = '```The bot has no prefix, the only way to make it work is by mentionning it before the command. The bot commands are:\n\nhelp - Shows the list of available commands.\n\ntemps - Shows the currently tempbanned and tempmuted members and their remaining time in seconds (Ban Members permission needed by the user that issues the command).\n\nversion - Shows the commit number of the current running instance.\n\nping - Mostly a debug command, echoes back \'Pong\'\n```\n\nMore informations and explanations on what is the bot about: https://github.com/ahoZiorce/betterban-bot/blob/master/README.md';
         bot.createMessage(message.channel.id, textToSend);
     });
     bot.handler.endpoint('^temps$', ['banMembers'], async (match, message) => {
