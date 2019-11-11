@@ -46,6 +46,7 @@ module.exports.loadModule = function loadModule(bot) {
                     message: message,
                     match: match,
                 },
+                require: require,
             });
 
             if (typeof evaled !== 'string') {
