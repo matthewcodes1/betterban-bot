@@ -1,4 +1,5 @@
 const { inspect } = require('util');
+const vm = require('vm');
 
 module.exports.loadModule = function loadModule(bot) {
     bot.handler.endpoint('^is-sudoer$', [], (match, message) => {
@@ -39,7 +40,13 @@ module.exports.loadModule = function loadModule(bot) {
         if (!bot.config.sudoers) return;
         if (bot.config.sudoers.indexOf(message.author.id) <= -1) return;
         try {
-            let evaled = eval(match[1]);
+            let evaled = vm.runInNewContext(match[1], {
+                ctx: {
+                    bot: bot,
+                    message: message,
+                    match: match,
+                },
+            });
 
             if (typeof evaled !== 'string') {
                 evaled = inspect(evaled);
