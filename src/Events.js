@@ -81,128 +81,134 @@ module.exports = function Events(bot) {
     bot.on('guildBanAdd', async (guild, user) => {
         await wait(5);
 
-        let entries = (await bot.getGuildAuditLogs(guild.id, 1, undefined, 22)).entries;
-        if (entries.length < 1) return;
-
-        let reason = entries[0].reason;
-        let match = reason.match(/^(.*?)(?:-(.*?))?$/);
-
-        if (!match) return;
-        if (!match[1]) return;
-
-        let m = match[2] ? match[2] : match[1];
-        let timeoutString = m.trim().toLowerCase();
-        if (timeoutString === 'softban' || timeoutString === 'sb') {
-            bot.unbanGuildMember(guild.id, user.id, 'Softban unban.');
-            return;
+        try {
+            let entries = (await bot.getGuildAuditLogs(guild.id, 1, undefined, 22)).entries;
+            if (entries.length < 1) return;
+    
+            let reason = entries[0].reason;
+            let match = reason.match(/^(.*?)(?:-(.*?))?$/);
+    
+            if (!match) return;
+            if (!match[1]) return;
+    
+            let m = match[2] ? match[2] : match[1];
+            let timeoutString = m.trim().toLowerCase();
+            if (timeoutString === 'softban' || timeoutString === 'sb') {
+                bot.unbanGuildMember(guild.id, user.id, 'Softban unban.');
+                return;
+            }
+    
+            let timeout = timestring(timeoutString, 'ms');
+            if (!timeout) return;
+            let timestamp = (new Date(Date.now() + timeout)).getTime();
+    
+            bot.db.Ban.create({
+                userId: user.id,
+                guildId: guild.id,
+                timestamp: timestamp,
+                timeout: timeout,
+            });
+            lt.setTimeout(() => {
+                bot.unbanGuildMember(guild.id, user.id, 'Unban timeout has passed.');
+                Logger.debug(`${user.id} has been unbanned from guild ${guild.id}`);
+                bot.db.Ban.destroy({ where: { userId: user.id, guildId: guild.id } });
+            }, timeout);
+    
+            Logger.debug(`Set tempban on user ${user.id} with timeout ${timeoutString} in guild ${guild.id}`);
         }
-
-        let timeout = timestring(timeoutString, 'ms');
-        if (!timeout) return;
-        let timestamp = (new Date(Date.now() + timeout)).getTime();
-
-        bot.db.Ban.create({
-            userId: user.id,
-            guildId: guild.id,
-            timestamp: timestamp,
-            timeout: timeout,
-        });
-        lt.setTimeout(() => {
-            bot.unbanGuildMember(guild.id, user.id, 'Unban timeout has passed.');
-            Logger.debug(`${user.id} has been unbanned from guild ${guild.id}`);
-            bot.db.Ban.destroy({ where: { userId: user.id, guildId: guild.id } });
-        }, timeout);
-
-        Logger.debug(`Set tempban on user ${user.id} with timeout ${timeoutString} in guild ${guild.id}`);
+        catch (e) {}
     });
 
     bot.on('guildMemberUpdate', async (guild, member, oldMember) => {
         await wait(5);
 
-        let entries = (await bot.getGuildAuditLogs(guild.id, 1, undefined, 22)).entries;
-        if (entries.length < 1) return;
-        let user = entries[0].user;
-        let responsible = guild.members.find(m => m.id === user.id);
-        if (!responsible.permission.has('voiceMuteMembers')) return;
-        if (member.nick === oldMember.nick || !member.nick) return;
-        let match = member.nick.match(/^m(?:ute)? +?(.*?)$/);
-        if (!match) return;
-        if (!match[1]) return;
-
-        let oldNick = oldMember.nick ? oldMember.nick : '';
-        bot.editGuildMember(guild.id, member.id, {
-            nick: oldNick.toLowerCase().startsWith('m ') || oldNick.toLowerCase().startsWith('mute ') ? '' : oldNick,
-        });
-
-        let channels = guild.channels.map(c => c.id);
-
-        let g = await bot.db.Guild.findOne({ where: { guildId: guild.id } });
-        let roleId;
-        if (g) {
-            // Guild in database
-            let mutedRoleId = g.get('mutedRoleId');
-            let t = guild.roles.find(a => a.id === mutedRoleId);
-            let newElement = checkIfNewElement(g.get('channels').split(','), channels);
-            if (t) {
-                // Role still exists
-                roleId = t.id;
-                if (newElement) {
+        try {
+            let entries = (await bot.getGuildAuditLogs(guild.id, 1, undefined, 24)).entries;
+            if (entries.length < 1) return;
+            let user = entries[0].user;
+            let responsible = guild.members.find(m => m.id === user.id);
+            if (!responsible.permission.has('voiceMuteMembers')) return;
+            if (member.nick === oldMember.nick || !member.nick) return;
+            let match = member.nick.match(/^m(?:ute)? +?(.*?)$/);
+            if (!match) return;
+            if (!match[1]) return;
+    
+            let oldNick = oldMember.nick ? oldMember.nick : '';
+            bot.editGuildMember(guild.id, member.id, {
+                nick: oldNick.toLowerCase().startsWith('m ') || oldNick.toLowerCase().startsWith('mute ') ? '' : oldNick,
+            });
+    
+            let channels = guild.channels.map(c => c.id);
+    
+            let g = await bot.db.Guild.findOne({ where: { guildId: guild.id } });
+            let roleId;
+            if (g) {
+                // Guild in database
+                let mutedRoleId = g.get('mutedRoleId');
+                let t = guild.roles.find(a => a.id === mutedRoleId);
+                let newElement = checkIfNewElement(g.get('channels').split(','), channels);
+                if (t) {
+                    // Role still exists
+                    roleId = t.id;
+                    if (newElement) {
+                        Array.from(guild.channels.values()).forEach(channel => {
+                            bot.editChannelPermission(channel.id, roleId, 0, 2103360, 'role');
+                        });
+                        await bot.db.Guild.update({
+                            channels: channels.join(','),
+                        }, { where: { guildId: guild.id } });
+                    }
+                }
+                else {
+                    // Role has been removed
+                    roleId = (await bot.createRole(guild.id, {
+                        name: 'Muted',
+                    })).id;
                     Array.from(guild.channels.values()).forEach(channel => {
                         bot.editChannelPermission(channel.id, roleId, 0, 2103360, 'role');
                     });
                     await bot.db.Guild.update({
+                        mutedRoleId: roleId,
                         channels: channels.join(','),
                     }, { where: { guildId: guild.id } });
                 }
             }
             else {
-                // Role has been removed
+                // Guild not in database; create role and overrides.
                 roleId = (await bot.createRole(guild.id, {
                     name: 'Muted',
                 })).id;
                 Array.from(guild.channels.values()).forEach(channel => {
                     bot.editChannelPermission(channel.id, roleId, 0, 2103360, 'role');
                 });
-                await bot.db.Guild.update({
+                await bot.db.Guild.create({
+                    guildId: guild.id,
                     mutedRoleId: roleId,
                     channels: channels.join(','),
-                }, { where: { guildId: guild.id } });
+                });
             }
-        }
-        else {
-            // Guild not in database; create role and overrides.
-            roleId = (await bot.createRole(guild.id, {
-                name: 'Muted',
-            })).id;
-            Array.from(guild.channels.values()).forEach(channel => {
-                bot.editChannelPermission(channel.id, roleId, 0, 2103360, 'role');
-            });
-            await bot.db.Guild.create({
+    
+            let timeoutString = match[1].trim().toLowerCase();
+            let timeout = timestring(timeoutString, 'ms');
+            if (!timeout) return;
+            let timestamp = (new Date(Date.now() + timeout)).getTime();
+            await bot.addGuildMemberRole(guild.id, member.id, roleId);
+    
+            bot.db.Mute.create({
+                userId: member.id,
                 guildId: guild.id,
                 mutedRoleId: roleId,
-                channels: channels.join(','),
+                timestamp: timestamp,
+                timeout: timeout,
             });
+            lt.setTimeout(() => {
+                bot.removeGuildMemberRole(guild.id, member.id, roleId);
+                Logger.debug(`${member.id} has been removed their muted role in guild ${guild.id}`);
+                bot.db.Mute.destroy({ where: { userId: member.id, guildId: guild.id } });
+            }, timeout);
+    
+            Logger.debug(`Set tempmute on user ${member.id} with timeout ${timeoutString} in guild ${guild.id}`);
         }
-
-        let timeoutString = match[1].trim().toLowerCase();
-        let timeout = timestring(timeoutString, 'ms');
-        if (!timeout) return;
-        let timestamp = (new Date(Date.now() + timeout)).getTime();
-        await bot.addGuildMemberRole(guild.id, member.id, roleId);
-
-        bot.db.Mute.create({
-            userId: member.id,
-            guildId: guild.id,
-            mutedRoleId: roleId,
-            timestamp: timestamp,
-            timeout: timeout,
-        });
-        lt.setTimeout(() => {
-            bot.removeGuildMemberRole(guild.id, member.id, roleId);
-            Logger.debug(`${member.id} has been removed their muted role in guild ${guild.id}`);
-            bot.db.Mute.destroy({ where: { userId: member.id, guildId: guild.id } });
-        }, timeout);
-
-        Logger.debug(`Set tempmute on user ${member.id} with timeout ${timeoutString} in guild ${guild.id}`);
+        catch (e) {}
     });
 };
