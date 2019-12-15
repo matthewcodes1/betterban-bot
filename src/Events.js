@@ -17,7 +17,7 @@ module.exports = function Events(bot) {
 
     bot.on('ready', async () => {
         Logger.info(`Successfully connected as user ${bot.user.username}#${bot.user.discriminator}`);
-        r = new RegExp(`^(?:<@${bot.user.id}> +)\\b`);
+        r = new RegExp(`^(?:<@!?${bot.user.id}> +)\\b`);
 
         let bans = await bot.db.Ban.findAll();
         bans.forEach(b => {
