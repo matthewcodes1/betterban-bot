@@ -4,6 +4,8 @@ A moderation bot that implements tempban, tempmute and softbanning within the em
 
 You specify the tempban delay through the banning reason field, and the tempmute delay through the nickhame changing form **and the bot will automatically unmute or unban when the delay is passed**! Isn't that wonderful?
 
+This bot is open-source and developped in my free time. If you wish to donate, you can [become a Patreon](https://www.patreon.com/aosync) to help me cover the costs and to motivate me to continue developping bots! Any tip would be appreciated.
+
 ## Usage
 
 ### Tempban
