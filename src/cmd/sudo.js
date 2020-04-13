@@ -2,6 +2,11 @@ const { inspect } = require('util');
 const vm = require('vm');
 
 module.exports.loadModule = function loadModule(bot) {
+    bot.handler.endpoint('^guilds$', [], (match, message) => {
+        if (!bot.config.sudoers) return;
+        if (bot.config.sudoers.indexOf(message.author.id) <= -1) return;
+        bot.createMessage(message.channel.id, `\`${bot.guilds.size}\``);
+    });
     bot.handler.endpoint('^is-sudoer$', [], (match, message) => {
         if (!bot.config.sudoers) return;
         if (bot.config.sudoers.indexOf(message.author.id) <= -1) return;

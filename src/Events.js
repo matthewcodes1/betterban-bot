@@ -19,6 +19,11 @@ module.exports = function Events(bot) {
         Logger.info(`Successfully connected as user ${bot.user.username}#${bot.user.discriminator}`);
         r = new RegExp(`^(?:<@!?${bot.user.id}> +)\\b`);
 
+        bot.editStatus('online', {
+            name: `@${bot.user.username} help`,
+            type: 2,
+        });
+
         let bans = await bot.db.Ban.findAll();
         bans.forEach(b => {
             if (parseInt(b.get('timestamp')) <= Date.now()) {
